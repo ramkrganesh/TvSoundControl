@@ -5,9 +5,10 @@
 #define CARRIER_FREQ      38000u  // 38khz carrier freq. NEC Protocol.
 #define LEAD_BURST_DUR_MS 9u      // 9ms Lead pulse duration.
 #define LEAD_LOW_PULSE_US 4500u   // 4500uS or 4.5mS duration for LOW time.
-#define LOG_1_0_TX_US     563u    // 563uS burst time to transmit '1' (562.2uS)
-#define LOG_1_TX_LOW_US   1687u   // 1.687ms delay
+#define LOG_1_0_TX_US     (563u - 25u)    // 563uS burst time to transmit '1' (562.2uS)
+#define LOG_1_TX_LOW_US   (1687u - 47u)   // 1.687ms delay
 #define LOG_0_TX_LOW_US   LOG_1_0_TX_US // 563uS low period
+// #define INIT_BURST_DELAY  (LEAD_BURST_DUR_MS - 3u)
 
 //- Following Macros are for testing
 #define PIN_INCREASE_VOL  7u
@@ -45,7 +46,7 @@ uint32 DecreaseVolume_u32 = 0xE11EBF40;
 *--------------------------------------------------------------------------- */
 void StartComm(void)
 {
-  tone(IR_LED, CARRIER_FREQ, LEAD_BURST_DUR_MS);
+  tone(IR_LED, CARRIER_FREQ);
   delay(LEAD_BURST_DUR_MS);
   noTone(IR_LED);
   digitalWrite(IR_LED, LOW);
@@ -62,10 +63,10 @@ void StartComm(void)
 * Parameters: None
 * Returns: None
 *--------------------------------------------------------------------------- */
-void StopComm(void)
+static inline void StopComm(void)
 {
   tone(IR_LED, CARRIER_FREQ);
-  delayMicroseconds(LOG_1_0_TX_US); // Simply reusing the macro for 563uS
+  delayMicroseconds(260); // Simply reusing the macro for 563uS
   noTone(IR_LED);
   digitalWrite(IR_LED, HIGH);
 }
@@ -87,7 +88,7 @@ void TransmitData(Message_Type* Cmd)
   for(uint8 bit_pos = 0u; bit_pos < 32; bit_pos++)
   {
       tone(IR_LED, CARRIER_FREQ);
-      delayMicroseconds(LOG_1_0_TX_US);
+      delayMicroseconds(270u); // edit here -----------------------------------
       noTone(IR_LED);
       digitalWrite(IR_LED, LOW);    
     

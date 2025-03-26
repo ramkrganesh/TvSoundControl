@@ -1,7 +1,7 @@
 /*Header file for tv_sound_ctrl module*/
 
 //- Configurations ------------------------------------------------------------
-#define CFG_TESTS_EN      True
+#define CFG_TESTS_EN        true
 //- MACRO Definitions ---------------------------------------------------------
 #define IR_LED              5u       // Pin 5 has PWM capabilities.
 #define SOUND_IN_ADC        A0       // ADC channel assignment

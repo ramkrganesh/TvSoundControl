@@ -50,7 +50,7 @@ static inline void StartComm(void)
 static inline void StopComm(void)
 {
   tone(IR_LED, CARRIER_FREQ);
-  delayMicroseconds(260); // Simply reusing the macro for 563uS
+  delayMicroseconds(BURST_563uS); // Simply reusing the macro for 563uS
   noTone(IR_LED);
   digitalWrite(IR_LED, LOW);
 }
@@ -71,7 +71,7 @@ void TransmitData(Message_Type* Cmd)
   for(uint8 bit_pos = 0u; bit_pos < 32; bit_pos++)
   {
       tone(IR_LED, CARRIER_FREQ);
-      delayMicroseconds(270u); // edit here 562.2uS---------------------------
+      delayMicroseconds(BURST_563uS);
       noTone(IR_LED);
       digitalWrite(IR_LED, LOW);    
     
@@ -87,26 +87,6 @@ void TransmitData(Message_Type* Cmd)
     }
   }
   StopComm();
-#if 0
-  delay(40);
-  for(uint8 idx = 0; idx < 8u; idx++)  /*Prepare Repeat signal: 4 times*/
-  {
-    
-    tone(IR_LED, CARRIER_FREQ);
-    delay(LEAD_BURST_DUR_MS);
-    noTone(IR_LED);
-    
-    digitalWrite(IR_LED, LOW);
-    delayMicroseconds(REPEAT_SIG_SPACE_US);
-
-    tone(IR_LED, CARRIER_FREQ);
-    delayMicroseconds(270u); // edit here 560uS-----------------------------
-    noTone(IR_LED);
-    digitalWrite(IR_LED, HIGH);
-
-    delay(REPEAT_SIG_DELAY_MS);
-  }
-#endif
 }
 
 /* ----------------------------------------------------------------------------
@@ -161,20 +141,40 @@ void setup() {
 #endif
 }
 
+//- LOOP function--------------------------------------------------------------
 void loop() {
   
   uint16 Tv_Volume_raw    = 0u;
   Tv_Volume_raw = (uint16)analogRead(SOUND_IN_ADC);
+
+#if (CFG_TEST_EN == false)
+  if(Tv_Volume_raw > VOLUME_THRESHOLD)
+  {
+    delay(3000);  // Wait for 3 seconds; Decrease if volume is still high.
+    if((uint16)analogRead(SOUND_IN_ADC) > VOLUME_THRESHOLD)
+    {
+      for(uint8 idx = 0; idx < 8 ; idx++)
+      {
+        ControlTv(DECREASE_VOLUME);
+        delay(650);
+      }
+    }
+  }
+
+  delay(VOL_DECR_WAIT_MS);
   
-#if CFG_TESTS_EN
+  for(uint8 idx = 0; idx < 6; idx++)
+  {
+    ControlTv(INCREASE_VOLUME);
+    delay(650);
+  }
+
+#else
+  /* The following code is only for Testing */
   if(digitalRead(PIN_INCREASE_VOL) == HIGH)
   {
     Serial.println("Button Pressed");
     delay(3000);
-#else
-  if(Tv_Volume_raw >= VOLUME_THRESHOLD)
-  {
-#endif
 
     for(uint8 idx = 0; idx < 8 ; idx++)
     {
@@ -188,4 +188,5 @@ void loop() {
       delay(650);
     }
   }
+#endif
 }

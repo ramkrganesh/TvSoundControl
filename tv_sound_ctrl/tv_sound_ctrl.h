@@ -18,7 +18,6 @@
 
 //- Following Macros are for testing
 #define PIN_INCREASE_VOL  7u
-#define PIN_DECREASE_VOL  4u
 
 //- Type Definitions  ---------------------------------------------------------
 typedef long  uint32;

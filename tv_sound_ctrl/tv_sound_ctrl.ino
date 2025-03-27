@@ -1,5 +1,14 @@
 /* Controlling TV using IR NEC protocol */
 
+/*
+* Notes:
+* -----
+* - It is not possible to send "repeat" signals. A repeat signal must be sent
+*   at an interval of 100ms. However, the TV receiver is unable to process the 
+*   repeat signal every 100ms. For this reason, the Increment/Decrement signal
+*   is sent multiple times (not the repeat signal) at an interval of 650ms.
+*/
+
 //- Header Includes -----------------------------------------------------------
 #include "tv_sound_ctrl.h"
 
@@ -43,7 +52,7 @@ static inline void StopComm(void)
   tone(IR_LED, CARRIER_FREQ);
   delayMicroseconds(260); // Simply reusing the macro for 563uS
   noTone(IR_LED);
-  digitalWrite(IR_LED, HIGH);
+  digitalWrite(IR_LED, LOW);
 }
 
 /*- ---------------------------------------------------------------------------
@@ -78,10 +87,10 @@ void TransmitData(Message_Type* Cmd)
     }
   }
   StopComm();
-
-  for(uint8 idx = 0; idx < 4u; idx++)  /*Prepare Repeat signal: 4 times*/
+#if 0
+  delay(40);
+  for(uint8 idx = 0; idx < 8u; idx++)  /*Prepare Repeat signal: 4 times*/
   {
-    delay(REPEAT_SIG_DELAY_MS);
     
     tone(IR_LED, CARRIER_FREQ);
     delay(LEAD_BURST_DUR_MS);
@@ -94,7 +103,10 @@ void TransmitData(Message_Type* Cmd)
     delayMicroseconds(270u); // edit here 560uS-----------------------------
     noTone(IR_LED);
     digitalWrite(IR_LED, HIGH);
+
+    delay(REPEAT_SIG_DELAY_MS);
   }
+#endif
 }
 
 /* ----------------------------------------------------------------------------
@@ -141,18 +153,17 @@ void ControlTv(Volume_Ctrl_Type Action)
 //- Init Function -------------------------------------------------------------
 void setup() {
   pinMode(IR_LED, OUTPUT);
-  digitalWrite(IR_LED, HIGH);
+  digitalWrite(IR_LED, LOW);
   
-  #if CFG_TESTS_EN
-    pinMode(PIN_INCREASE_VOL, INPUT);
-    pinMode(PIN_DECREASE_VOL, INPUT);
-    Serial.begin(9600);
-  #endif
+#if CFG_TESTS_EN
+  pinMode(PIN_INCREASE_VOL, INPUT);
+  Serial.begin(9600);
+#endif
 }
 
 void loop() {
+  
   uint16 Tv_Volume_raw    = 0u;
-
   Tv_Volume_raw = (uint16)analogRead(SOUND_IN_ADC);
   
 #if CFG_TESTS_EN
@@ -165,9 +176,16 @@ void loop() {
   {
 #endif
 
-    ControlTv(DECREASE_VOLUME);
+    for(uint8 idx = 0; idx < 8 ; idx++)
+    {
+      ControlTv(DECREASE_VOLUME);
+      delay(650);
+    }
     delay(VOL_DECR_WAIT_MS);
-    ControlTv(INCREASE_VOLUME);
+    for(uint8 idx = 0; idx < 8; idx++)
+    {
+      ControlTv(INCREASE_VOLUME);
+      delay(650);
+    }
   }
-
 }

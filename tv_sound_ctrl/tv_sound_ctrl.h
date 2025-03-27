@@ -1,7 +1,7 @@
 /*Header file for tv_sound_ctrl module*/
 
 //- Configurations ------------------------------------------------------------
-#define CFG_TESTS_EN        false
+#define CFG_MAIN_CODE       1u
 //- MACRO Definitions ---------------------------------------------------------
 #define IR_LED              5u       // Pin 5 has PWM capabilities.
 #define SOUND_IN_ADC        A0       // ADC channel assignment
@@ -11,7 +11,7 @@
 #define BURST_563uS         (563u - 293u)    // 563uS burst time to transmit '1' (562.2uS)
 #define LOG_1_TX_LOW_US     (1687u - 47u)   // 1.687ms delay
 #define LOG_0_TX_LOW_US     BURST_563uS // 563uS low period
-#define VOLUME_THRESHOLD    256u  // <<<<<--------------------------------------------------ADJUST HERE 
+#define VOLUME_THRESHOLD    400u  // <<<<<--------------------------------------------------ADJUST HERE 
 #define VOL_DECR_WAIT_MS    9000u // wait time after decreasing volume.
 #define REPEAT_SIG_SPACE_US 2200u // 2.25ms low signal.
 #define REPEAT_SIG_DELAY_MS 110u  // 110ms delay for each REPEAT signal

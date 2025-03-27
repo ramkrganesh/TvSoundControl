@@ -50,7 +50,7 @@ static inline void StartComm(void)
 static inline void StopComm(void)
 {
   tone(IR_LED, CARRIER_FREQ);
-  delayMicroseconds(BURST_563uS); // Simply reusing the macro for 563uS
+  delayMicroseconds(260); // Simply reusing the macro for 563uS
   noTone(IR_LED);
   digitalWrite(IR_LED, LOW);
 }
@@ -83,7 +83,7 @@ void TransmitData(Message_Type* Cmd)
     else
     {
       //- Transmit '0'
-      delayMicroseconds(LOG_0_TX_LOW_US);
+      delayMicroseconds(538);
     }
   }
   StopComm();
@@ -135,10 +135,8 @@ void setup() {
   pinMode(IR_LED, OUTPUT);
   digitalWrite(IR_LED, LOW);
   
-#if CFG_TESTS_EN
   pinMode(PIN_INCREASE_VOL, INPUT);
   Serial.begin(9600);
-#endif
 }
 
 //- LOOP function--------------------------------------------------------------
@@ -146,8 +144,10 @@ void loop() {
   
   uint16 Tv_Volume_raw    = 0u;
   Tv_Volume_raw = (uint16)analogRead(SOUND_IN_ADC);
+  Serial.print("Adc value = ");
+  Serial.println(Tv_Volume_raw);
 
-#if (CFG_TEST_EN == false)
+#if (CFG_MAIN_CODE)
   if(Tv_Volume_raw > VOLUME_THRESHOLD)
   {
     delay(3000);  // Wait for 3 seconds; Decrease if volume is still high.
@@ -158,15 +158,13 @@ void loop() {
         ControlTv(DECREASE_VOLUME);
         delay(650);
       }
+      delay(VOL_DECR_WAIT_MS);
+      for(uint8 idx = 0; idx < 6; idx++)
+      {
+        ControlTv(INCREASE_VOLUME);
+        delay(650);
+      }
     }
-  }
-
-  delay(VOL_DECR_WAIT_MS);
-  
-  for(uint8 idx = 0; idx < 6; idx++)
-  {
-    ControlTv(INCREASE_VOLUME);
-    delay(650);
   }
 
 #else

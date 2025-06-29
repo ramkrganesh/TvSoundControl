@@ -1,4 +1,4 @@
-/* Controlling TV using IR NEC protocol */
+/* Controlling TV using IR NEC protocol - */
 
 /*
 * Notes:
